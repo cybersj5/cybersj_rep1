@@ -28,7 +28,7 @@ def reg3(message): #кнопка главное меню
 def reg4(message): #Главное меню
     markup = types.InlineKeyboardMarkup()
     markup.add(types.InlineKeyboardButton("Место в списке абитуриентов",callback_data="place"))
-    markup.add(types.InlineKeyboardButton("Подать аттестат", callback_data="doki"))
+    markup.add(types.InlineKeyboardButton("Подать аттестат", callback_data="docs"))
     markup.add(types.InlineKeyboardButton("АИС Абитуриент", url="https://abiturient.sfu-kras.ru"))
     markup.add(types.InlineKeyboardButton("Группа в ВК",url="https://vk.com/dovuz_sfu?from=search"))
     if message.text == "Открыть главное меню":
