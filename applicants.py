@@ -11,7 +11,10 @@ curse.execute("""CREATE TABLE IF NOT EXISTS applicants(
                 exam_scores int)""")
 connection.commit()
 
-applicants_list = [1, True, 'Смагин Михаил Юрьевич', '11111111111', 219]
+applicant_1 = [1, True, 'Смагин Михаил Юрьевич', '11111111111', 219]
+curse.execute("INSERT OR IGNORE INTO applicants VALUES(?,?,?,?,?);", applicant_1)
 
-curse.execute("INSERT INTO applicants VALUES(?,?,?,?,?);", applicants_list)
+applicant_2 = [2, True, 'Главинская Анна Павловна', '22222222222', 234]
+curse.execute("INSERT OR IGNORE INTO applicants VALUES(?,?,?,?,?);", applicant_2)
+
 connection.commit()
