@@ -6,7 +6,7 @@ def main(message):
     markup = types.ReplyKeyboardMarkup()
     markup.add(types.KeyboardButton("Зарегестрироваться" ))
 
-    bot.reply_to(message,"Привет! Я бот Abit-SFU, я помогу тебе отслеживать твою позицию в списках абитуриентов СФУ, начнём с регистрации!",reply_markup=markup)
+    bot.reply_to(message,"Привет! Я бот Abit-SFU, я помогу тебе отслеживать твою позицию в списках абитуриентов СФУ, начнём с регистрации! Вам понадобится ввести свои ФИО и номер СНИЛС",reply_markup=markup)
     bot.register_next_step_handler(message,reg1)
 
 def reg1(message):
@@ -34,6 +34,9 @@ def reg4(message): #Главное меню
     if message.text == "Открыть главное меню":
         bot.send_message(message.chat.id, "Ты находишься в главном меню, воспользуйся одной из функций", reply_markup=markup)
 
+#def callback(callback):
+#    if callback.data == "docs":
+#    elif callback.data == "place":
 
 
 bot.polling(none_stop = True)
