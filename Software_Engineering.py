@@ -1,5 +1,6 @@
 import sqlite3
 
+
 connection = sqlite3.connect('applicants_of_SoftEngineering.db')
 curse_2 = connection.cursor()
 

@@ -37,5 +37,5 @@ def reg4(message): #Главное меню
 #def callback(callback):
 #    if callback.data == "docs":
 #    elif callback.data == "place":
-print("hello")
+
 bot.polling(none_stop = True)
