@@ -1,22 +1,27 @@
-import telebot
 import sqlite3
 
-bot=telebot.TeleBot("7006292589:AAFikVQR1SSuXX5RsHxmWrYba3tgpHc265M")
+connection = sqlite3.connect("Users.db")
 
-@bot.message_handler(comands=['start'])
-def start(message):
-    connection = sqlite3.connect("Users.db")
-    curse = connection.cursor()
+curse = connection.cursor()
 
 
-    curse.execute('CREATE TABLE IF NOT EXISTS '
-                  'Users'
-                  '(id int auto_increment primary key, '
-                  'full_name varchar(100),'
-                  'snils varchar(11),')
-    connection.commit()
-    curse.close
-    connection.close
+curse.execute("""CREATE TABLE IF NOT EXISTS Users(  
+                full_name varchar(100) primary key, 
+                snils varchar(11))""")
+connection.commit()
+
+curse.execute("SELECT * FROM Users")
+
+connection.commit()
+# curse.execute("DELETE FROM Users")
+# connection.commit()
+
+for i in curse:
+    print(i)
+
+
+"""curse.close
+connection.close"""
 
 
 
@@ -24,4 +29,5 @@ def start(message):
 
 
 
-bot.polling(none_stop=True)
+
+

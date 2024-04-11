@@ -1,6 +1,14 @@
 import telebot
 import sqlite3
 from telebot import types
+from time import sleep
+
+
+
+
+
+
+
 
 full_name = None
 snils = None
@@ -35,6 +43,17 @@ def reg3(message): #кнопка главное меню
     bot.send_message(message.chat.id, "Отлично,вы зарегестрированы, откройте главное меню",reply_markup=markup)
     bot.register_next_step_handler(message, reg4)
 def reg4(message): #Главное меню
+    connection = sqlite3.connect("Users.db")  # запись в бд пользователй
+    curse = connection.cursor()
+    userNote = [full_name, snils]
+    curse.execute("INSERT OR IGNORE INTO Users  VALUES (?,?)", userNote)
+
+    connection.commit()
+
+    curse.close
+    connection.close
+
+
     markup = types.InlineKeyboardMarkup()
     markup.add(types.InlineKeyboardButton("Место в списке абитуриентов",callback_data="place"))
     markup.add(types.InlineKeyboardButton("Подать аттестат", callback_data="docs"))
@@ -43,18 +62,33 @@ def reg4(message): #Главное меню
     if message.text == "Открыть главное меню":
         bot.send_message(message.chat.id, "Ты находишься в главном меню, воспользуйся одной из функций", reply_markup=markup)
 
-def user_pass(message):
-    connection = sqlite3.connect("Users.db")
+"""def user_pass(message):
+    connection = sqlite3.connect("Users.dl")
     curse = connection.cursor()
 
 
-    curse.execute(f'INSERT OR IGNORE INTO Users (full_name, snils) VALUES ({full_name}, {snils})')
+
+    curse.execute(f'INSERT OR IGNORE INTO Users (full_name, snils) VALUES ({full_name}, {snils});')
+
 
     connection.commit()
+
     curse.close
-    connection.close
+    connection.close"""
+
+
+
+
+
 #def callback(callback):
 #    if callback.data == "docs":
 #    elif callback.data == "place":
 
-bot.polling(none_stop = True)
+while True:
+    try:
+        bot.polling(none_stop=True)
+    except Exception as _ex:
+        print(_ex)
+        sleep(15)
+
+"""bot.polling(none_stop = True)"""
