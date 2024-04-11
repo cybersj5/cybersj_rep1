@@ -13,13 +13,11 @@ def start(message):
                   'Users'
                   '(id int auto_increment primary key, '
                   'full_name varchar(100),'
-                  'snils varchar(11),'
-                  'exam_scores int)')
+                  'snils varchar(11),')
     connection.commit()
     curse.close
     connection.close
 
-    bot.send_message(message.chat.id,"Данные внесены")
 
 
 

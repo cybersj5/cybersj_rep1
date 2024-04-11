@@ -1,5 +1,10 @@
 import telebot
+import sqlite3
 from telebot import types
+
+full_name = None
+snils = None
+
 bot = telebot.TeleBot('7006292589:AAFikVQR1SSuXX5RsHxmWrYba3tgpHc265M')
 @bot.message_handler(commands = ['start'])
 def main(message):
@@ -15,12 +20,16 @@ def reg1(message):
     bot.register_next_step_handler(message, reg2)
 
 def reg2(message):
+    global full_name
+    full_name = message.text.strip()
     bot.send_message(message.chat.id, "Введите СНИЛС")
     bot.register_next_step_handler(message, reg3)
 
 
 
 def reg3(message): #кнопка главное меню
+    global snils
+    snils = message.text.strip()
     markup = types.ReplyKeyboardMarkup()
     markup.add(types.KeyboardButton("Открыть главное меню"))
     bot.send_message(message.chat.id, "Отлично,вы зарегестрированы, откройте главное меню",reply_markup=markup)
@@ -34,6 +43,16 @@ def reg4(message): #Главное меню
     if message.text == "Открыть главное меню":
         bot.send_message(message.chat.id, "Ты находишься в главном меню, воспользуйся одной из функций", reply_markup=markup)
 
+def user_pass(message):
+    connection = sqlite3.connect("Users.db")
+    curse = connection.cursor()
+
+
+    curse.execute(f'INSERT OR IGNORE INTO Users (full_name, snils) VALUES ({full_name}, {snils})')
+
+    connection.commit()
+    curse.close
+    connection.close
 #def callback(callback):
 #    if callback.data == "docs":
 #    elif callback.data == "place":
