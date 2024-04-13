@@ -62,7 +62,9 @@ def reg4(message): #Главное меню
     if message.text == "Открыть главное меню":
         bot.send_message(message.chat.id, "Ты находишься в главном меню, воспользуйся одной из функций", reply_markup=markup)
 
-"""def user_pass(message):
+"""def user_pass(message): # функция записи введённых пользователеим данных в базу данных Users
+
+
     connection = sqlite3.connect("Users.dl")
     curse = connection.cursor()
 

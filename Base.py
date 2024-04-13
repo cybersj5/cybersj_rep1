@@ -5,8 +5,9 @@ connection = sqlite3.connect("Users.db")
 curse = connection.cursor()
 
 
-curse.execute("""CREATE TABLE IF NOT EXISTS Users(  
-                full_name varchar(100) primary key, 
+curse.execute("""CREATE TABLE IF NOT EXISTS Users( 
+                id int auto increment primary key, 
+                full_name varchar(100), 
                 snils varchar(11))""")
 connection.commit()
 
