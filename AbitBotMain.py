@@ -14,6 +14,13 @@ full_name = None
 snils = None
 
 bot = telebot.TeleBot('7006292589:AAFikVQR1SSuXX5RsHxmWrYba3tgpHc265M')
+
+
+
+
+
+
+
 @bot.message_handler(commands = ['start'])
 def main(message):
     markup = types.ReplyKeyboardMarkup()
@@ -42,7 +49,9 @@ def reg3(message): #кнопка главное меню
     markup.add(types.KeyboardButton("Открыть главное меню"))
     bot.send_message(message.chat.id, "Отлично,вы зарегестрированы, откройте главное меню",reply_markup=markup)
     bot.register_next_step_handler(message, reg4)
-def reg4(message): #Главное меню
+
+
+
     connection = sqlite3.connect("Users.db")  # запись в бд пользователй
     curse = connection.cursor()
     userNote = [full_name, snils]
@@ -52,8 +61,7 @@ def reg4(message): #Главное меню
 
     curse.close
     connection.close
-
-
+def reg4(message): #Главное меню
     markup = types.InlineKeyboardMarkup()
     markup.add(types.InlineKeyboardButton("Место в списке абитуриентов",callback_data="place"))
     markup.add(types.InlineKeyboardButton("Подать аттестат", callback_data="docs"))
@@ -62,22 +70,16 @@ def reg4(message): #Главное меню
     if message.text == "Открыть главное меню":
         bot.send_message(message.chat.id, "Ты находишься в главном меню, воспользуйся одной из функций", reply_markup=markup)
 
-"""def user_pass(message): # функция записи введённых пользователеим данных в базу данных Users
-
-
-    connection = sqlite3.connect("Users.dl")
-    curse = connection.cursor()
-
-
-
-    curse.execute(f'INSERT OR IGNORE INTO Users (full_name, snils) VALUES ({full_name}, {snils});')
-
-
-    connection.commit()
-
-    curse.close
-    connection.close"""
-
+@bot.message_handler()
+def menu(message):
+    if message.text.lower() == 'открыть главное меню':
+        markup = types.InlineKeyboardMarkup()
+        markup.add(types.InlineKeyboardButton("Место в списке абитуриентов", callback_data="place"))
+        markup.add(types.InlineKeyboardButton("Подать аттестат", callback_data="docs"))
+        markup.add(types.InlineKeyboardButton("АИС Абитуриент", url="https://abiturient.sfu-kras.ru"))
+        markup.add(types.InlineKeyboardButton("Группа в ВК", url="https://vk.com/dovuz_sfu?from=search"))
+        bot.send_message(message.chat.id, "Ты находишься в главном меню, воспользуйся одной из функций",
+                         reply_markup=markup)
 
 
 
