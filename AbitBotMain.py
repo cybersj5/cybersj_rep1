@@ -9,7 +9,7 @@ from time import sleep
 
 
 
-
+docs = False
 full_name = None
 snils = None
 
@@ -84,9 +84,15 @@ def menu(message):
 
 
 
-#def callback(callback):
-#    if callback.data == "docs":
-#    elif callback.data == "place":
+def callback(callback):
+    global docs
+    if callback.data == "docs":
+        if docs == True:
+            docs = False
+        else:
+            docs = True
+
+    # elif callback.data == "place":
 
 while True:
     try:
