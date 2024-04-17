@@ -13,16 +13,23 @@ connection.commit()
 
 applicant_1 = [1, True, 'Смагин Михаил Юрьевич', '11111111111', 219]
 curse.execute("INSERT OR IGNORE INTO Applied_Informatics VALUES(?,?,?,?,?);", applicant_1)
+connection.commit()
 
 applicant_2 = [2, True, 'Главинская Анна Павловна', '22222222222', 234]
 curse.execute("INSERT OR IGNORE INTO Applied_Informatics VALUES(?,?,?,?,?);", applicant_2)
+connection.commit()
 
 applicant_3 = [3, True, 'Федина Юлиана Викторовна', '33333333333', 225]
 curse.execute("INSERT OR IGNORE INTO Applied_Informatics VALUES(?,?,?,?,?);", applicant_3)
-
-curse.execute('SELECT * FROM Applied_Informatics')
-
-for i in curse:
-    print(i)
-
 connection.commit()
+
+curse.execute("""SELECT full_name, snils, exam_scores
+                             FROM Applied_Informatics
+                             ORDER BY exam_scores
+                             DESC""")
+connection.commit()
+
+
+
+
+

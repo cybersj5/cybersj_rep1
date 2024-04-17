@@ -11,14 +11,13 @@ curse.execute("""CREATE TABLE IF NOT EXISTS Users(
                 snils varchar(11))""")
 connection.commit()
 
-# curse.execute("SELECT * FROM Users")
-#
-# connection.commit()
+
+
+
 # curse.execute("DELETE FROM Users")
 # connection.commit()
 
-for i in curse:
-    print(i)
+
 
 
 # curse.close

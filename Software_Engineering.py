@@ -23,6 +23,5 @@ curse_2.execute("INSERT OR IGNORE INTO Software_Engineering VALUES(?,?,?,?,?);",
 
 curse_2.execute("SELECT * FROM Software_Engineering ORDER BY exam_scores DESC")
 
-for i in curse_2:
-    print(i)
+
 connection.commit()

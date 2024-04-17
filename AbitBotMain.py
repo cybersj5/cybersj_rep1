@@ -74,25 +74,55 @@ def reg4(message): #Главное меню
 def menu(message):
     if message.text.lower() == 'открыть главное меню':
         markup = types.InlineKeyboardMarkup()
-        markup.add(types.InlineKeyboardButton("Место в списке абитуриентов", callback_data="place"))
-        markup.add(types.InlineKeyboardButton("Подать аттестат", callback_data="docs"))
-        markup.add(types.InlineKeyboardButton("АИС Абитуриент", url="https://abiturient.sfu-kras.ru"))
-        markup.add(types.InlineKeyboardButton("Группа в ВК", url="https://vk.com/dovuz_sfu?from=search"))
-        bot.send_message(message.chat.id, "Ты находишься в главном меню, воспользуйся одной из функций",
+        markup.add(types.InlineKeyboardButton("Место в списке абитуриентов", callback_data='place'))
+        markup.add(types.InlineKeyboardButton("Подать аттестат", callback_data='docs'))
+        markup.add(types.InlineKeyboardButton("АИС Абитуриент", url='https://abiturient.sfu-kras.ru'))
+        markup.add(types.InlineKeyboardButton("Группа в ВК", url='https://vk.com/dovuz_sfu?from=search'))
+        bot.send_message(message.chat.id, 'Ты находишься в главном меню, воспользуйся одной из функций',
                          reply_markup=markup)
 
 
 
+# @bot.callback_query_handler(func=lambda callback: True)
+# def callback_message(callback):
+#     global docs
+#     place = 0
+#     if callback.data == 'docs':
+#         if docs == True:
+#             docs = False
+#         else:
+#             docs = True
+#
+#     elif callback.data == 'place':
+#         global full_name
+#         global snils
+#         if docs == False:
+#             connection = sqlite3.connect('applicants_of_AppInformatics.db')
+#             cursor = connection.cursor()
+#             cursor.execute("""SELECT full_name, snils, exam_scores
+#                              FROM Applied_Informatics
+#                              ORDER BY exam_scores
+#                              DESC""")
+#             connection.commit()
+#             # for i in cursor: print(i)
+#             for rec in cursor:
+#                 for element in rec:
+#                     if str(element) == str(full_name):
+#
+#
+#             bot.send_message(callback.message.chat.id, f'Твоё место в списке:{place}')
 
-def callback(callback):
-    global docs
-    if callback.data == "docs":
-        if docs == True:
-            docs = False
-        else:
-            docs = True
 
-    # elif callback.data == "place":
+
+
+
+
+
+
+
+
+
+
 
 while True:
     try:
