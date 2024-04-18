@@ -83,34 +83,39 @@ def menu(message):
 
 
 
-# @bot.callback_query_handler(func=lambda callback: True)
-# def callback_message(callback):
-#     global docs
-#     place = 0
-#     if callback.data == 'docs':
-#         if docs == True:
-#             docs = False
-#         else:
-#             docs = True
-#
-#     elif callback.data == 'place':
-#         global full_name
-#         global snils
-#         if docs == False:
-#             connection = sqlite3.connect('applicants_of_AppInformatics.db')
-#             cursor = connection.cursor()
-#             cursor.execute("""SELECT full_name, snils, exam_scores
-#                              FROM Applied_Informatics
-#                              ORDER BY exam_scores
-#                              DESC""")
-#             connection.commit()
-#             # for i in cursor: print(i)
-#             for rec in cursor:
-#                 for element in rec:
-#                     if str(element) == str(full_name):
-#
-#
-#             bot.send_message(callback.message.chat.id, f'Твоё место в списке:{place}')
+@bot.callback_query_handler(func=lambda callback: True)
+def callback_message(callback):
+    global docs
+    if callback.data == 'docs':
+        if docs == True:
+            docs = False
+        else:
+            docs = True
+
+    elif callback.data == 'place':
+        global full_name
+        global snils
+        place = 0
+        if docs == False:
+            connection = sqlite3.connect('applicants_of_AppInformatics.db')
+            cursor = connection.cursor()
+            cursor.execute("""SELECT full_name, snils, exam_scores
+                             FROM Applied_Informatics
+                             ORDER BY exam_scores
+                             DESC""")
+            connection.commit()
+            for rec in cursor:
+                place += 1
+                if str(rec[0]) == str(full_name):
+                    if str(rec[1]) == str(snils):
+                        bot.send_message(callback.message.chat.id, f'Твоё место в списке:{place}')
+
+
+
+
+
+
+
 
 
 

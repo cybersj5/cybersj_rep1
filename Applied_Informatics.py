@@ -28,7 +28,20 @@ curse.execute("""SELECT full_name, snils, exam_scores
                              ORDER BY exam_scores
                              DESC""")
 connection.commit()
-
+for i in curse:
+    print(i)
+# place = 0
+# c = 0
+# for i in curse:
+#     c += 1
+#     print(i)
+#     if true:
+#         print(c)
+#
+#     for j in i:
+#         print(j)
+#     print()
+# connection.commit()
 
 
 
