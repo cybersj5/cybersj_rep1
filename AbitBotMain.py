@@ -23,14 +23,21 @@ bot = telebot.TeleBot('7006292589:AAFikVQR1SSuXX5RsHxmWrYba3tgpHc265M')
 
 @bot.message_handler(commands = ['start'])
 def start(message):
-    if registration == False:
-        bot.send_message(message.chat.id, "Привет! Я бот Abit-SFU, я помогу тебе отслеживать твою позицию в списках абитуриентов СФУ.")
+    if registration == True:
+        bot.send_message(message.chat.id,
+                         "Привет! Я бот Abit-SFU, я помогу тебе отслеживать твою позицию в списках абитуриентов СФУ.")
         markup = types.InlineKeyboardMarkup()
         markup.add(types.InlineKeyboardButton("📍 Место в списке абитуриентов", callback_data='place'))
         markup.add(types.InlineKeyboardButton("📝 Подать аттестат", callback_data='docs'))
         markup.add(types.InlineKeyboardButton("⚙ АИС Абитуриент", url='https://abiturient.sfu-kras.ru'))
         markup.add(types.InlineKeyboardButton("🐿 Группа в ВК", url='https://vk.com/dovuz_sfu?from=search'))
         bot.send_message(message.chat.id, "Вы находитесь в главном меню!\n\n Чтобы узнать свое место в списках поступающих, нажмите <b>Место в списке абитуриентов</b>\n\n Если вы подали аттестат в СФУ, то нажмите <b>Подать аттестат</b>\n\n Чтобы перейти в АИС Абитуриент, нажмите <b>АИС Абитуриент</b>\n\n Чтобы перейти в группу в ВК, нажмите <b>Группа в ВК</b>\n\n", reply_markup=markup, parse_mode='html')
+    if registration == False:
+        markup = types.InlineKeyboardMarkup()
+        markup.add(types.InlineKeyboardButton('🚀 Зарегистрироваться', callback_data='reg'))
+        bot.send_message(message.chat.id,
+                         "Привет! Я бот Abit-SFU, я помогу тебе отслеживать твою позицию в списках абитуриентов СФУ. Для начала давай зарегистрируемся.", reply_markup=markup)
+
 
 
 
@@ -100,7 +107,7 @@ def menu(message):
         markup.add(types.InlineKeyboardButton("📍 Место в списке абитуриентов", callback_data='place'))
         markup.add(types.InlineKeyboardButton("📝 Подать аттестат", callback_data='docs'))
         markup.add(types.InlineKeyboardButton("⚙ АИС Абитуриент", url='https://abiturient.sfu-kras.ru'))
-        markup.add(types.InlineKeyboardButton("🐿 Группа в ВК", url='https://vk.com/dovuz_sfu?from=search'))
+        markup.add(types.InlineKeyboardButton(f"🐿 Группа в ВК {"Поступай в СФУ"}", url='https://vk.com/dovuz_sfu?from=search'))
         bot.send_message(message.chat.id,
                          "Вы находитесь в главном меню!\n\n Чтобы узнать свое место в списках поступающих, нажмите <b>Место в списке абитуриентов</b>\n\n Если вы подали аттестат в СФУ, то нажмите <b>Подать аттестат</b>\n\n Чтобы перейти в АИС Абитуриент, нажмите <b>АИС Абитуриент</b>\n\n Чтобы перейти в группу в ВК, нажмите <b>Группа в ВК</b>\n\n",
                          reply_markup=markup, parse_mode='html')
@@ -108,6 +115,11 @@ def menu(message):
 
 @bot.callback_query_handler(func=lambda callback: True)
 def callback_message(callback):
+    if callback.data == 'reg':
+        main_message = callback.message
+        bot.send_message(main_message.chat.id, "Введите ФИО")
+        bot.register_next_step_handler(main_message, reg2)
+
     global docs
     if callback.data == 'docs':
         if docs == True:
@@ -135,6 +147,44 @@ def callback_message(callback):
                 if str(rec[0]) == str(full_name):
                     if str(rec[1]) == str(snils):
                         bot.send_message(callback.message.chat.id, f'Твоё место в списке: {place}')
+
+
+
+def reg2(main_message):
+        global full_name
+        full_name = main_message.text.strip()
+        bot.send_message(main_message.chat.id, "Введите СНИЛС")
+        bot.register_next_step_handler(main_message, reg3)
+
+
+def reg3(main_message):  # кнопка главное меню
+    global snils
+    snils = main_message.text.strip()
+    markup = types.ReplyKeyboardMarkup()
+    markup.add(types.KeyboardButton("Открыть главное меню"))
+    bot.send_message(main_message.chat.id, "Отлично,вы зарегестрированы, откройте главное меню", reply_markup=markup)
+    bot.register_next_step_handler(main_message, reg4)
+
+    connection = sqlite3.connect("Users.db")  # запись в бд пользователй
+    curse = connection.cursor()
+    userNote = [full_name, snils]
+    curse.execute("INSERT OR IGNORE INTO Users  VALUES (?,?)", userNote)
+    connection.commit()
+    curse.close
+    connection.close
+
+
+def reg4(main_message):
+    global registration
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton("📍 Место в списке абитуриентов", callback_data='place'))
+    markup.add(types.InlineKeyboardButton("📝 Подать аттестат", callback_data='docs'))
+    markup.add(types.InlineKeyboardButton("⚙ АИС Абитуриент", url='https://abiturient.sfu-kras.ru'))
+    markup.add(types.InlineKeyboardButton("🐿 Группа в ВК", url='https://vk.com/dovuz_sfu?from=search'))
+    bot.send_message(message.chat.id,
+                     "Вы находитесь в главном меню!\n\n Чтобы узнать свое место в списках поступающих, нажмите <b>Место в списке абитуриентов</b>\n\n Если вы подали аттестат в СФУ, то нажмите <b>Подать аттестат</b>\n\n Чтобы перейти в АИС Абитуриент, нажмите <b>АИС Абитуриент</b>\n\n Чтобы перейти в группу в ВК, нажмите <b>Группа в ВК</b>\n\n",
+                     reply_markup=markup, parse_mode='html')
+    registration = True
 
 
 
