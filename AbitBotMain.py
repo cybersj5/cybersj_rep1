@@ -30,7 +30,7 @@ def start(message):
         markup.add(types.InlineKeyboardButton("📍 Место в списке абитуриентов", callback_data='place'))
         markup.add(types.InlineKeyboardButton("📝 Подать аттестат", callback_data='docs'))
         markup.add(types.InlineKeyboardButton("⚙ АИС Абитуриент", url='https://abiturient.sfu-kras.ru'))
-        markup.add(types.InlineKeyboardButton("🐿 Группа в ВК", url='https://vk.com/dovuz_sfu?from=search'))
+        markup.add(types.InlineKeyboardButton(f"🐿 Группа в ВК {"Поступай в СФУ"}", url='https://vk.com/dovuz_sfu?from=search'))
         bot.send_message(message.chat.id, "Вы находитесь в главном меню!\n\n Чтобы узнать свое место в списках поступающих, нажмите <b>Место в списке абитуриентов</b>\n\n Если вы подали аттестат в СФУ, то нажмите <b>Подать аттестат</b>\n\n Чтобы перейти в АИС Абитуриент, нажмите <b>АИС Абитуриент</b>\n\n Чтобы перейти в группу в ВК, нажмите <b>Группа в ВК</b>\n\n", reply_markup=markup, parse_mode='html')
     if registration == False:
         markup = types.InlineKeyboardMarkup()
@@ -159,6 +159,7 @@ def reg2(main_message):
 
 def reg3(main_message):  # кнопка главное меню
     global snils
+    global registration
     snils = main_message.text.strip()
     markup = types.ReplyKeyboardMarkup()
     markup.add(types.KeyboardButton("Открыть главное меню"))
@@ -172,6 +173,7 @@ def reg3(main_message):  # кнопка главное меню
     connection.commit()
     curse.close
     connection.close
+    registration = True
 
 
 def reg4(main_message):
@@ -184,7 +186,7 @@ def reg4(main_message):
     bot.send_message(message.chat.id,
                      "Вы находитесь в главном меню!\n\n Чтобы узнать свое место в списках поступающих, нажмите <b>Место в списке абитуриентов</b>\n\n Если вы подали аттестат в СФУ, то нажмите <b>Подать аттестат</b>\n\n Чтобы перейти в АИС Абитуриент, нажмите <b>АИС Абитуриент</b>\n\n Чтобы перейти в группу в ВК, нажмите <b>Группа в ВК</b>\n\n",
                      reply_markup=markup, parse_mode='html')
-    registration = True
+
 
 
 
