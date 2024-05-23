@@ -63,6 +63,7 @@ curse_2.execute("INSERT OR IGNORE INTO Software_Engineering VALUES(?,?,?,?,?);",
 applicant_20 = [17, False, 'Гущин Егор Романович', '57133218110', 289]
 curse_2.execute("INSERT OR IGNORE INTO Software_Engineering VALUES(?,?,?,?,?);", applicant_20)
 
-
+# curse_2.execute("DELETE FROM Software_Engineering")
+# connection.commit()
 
 connection.commit()

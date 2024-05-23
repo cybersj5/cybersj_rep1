@@ -68,6 +68,10 @@ curse.execute("""SELECT full_name, snils, exam_scores
                              FROM Applied_Informatics
                              ORDER BY exam_scores
                              DESC""")
+
+# curse.execute("DELETE FROM Applied_Informatics")
+# connection.commit()
+
 connection.commit()
 for i in curse:
     print(i)
