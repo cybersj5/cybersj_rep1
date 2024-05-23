@@ -64,7 +64,5 @@ applicant_20 = [17, False, 'Гущин Егор Романович', '5713321811
 curse_2.execute("INSERT OR IGNORE INTO Software_Engineering VALUES(?,?,?,?,?);", applicant_20)
 
 
-curse_2.execute("SELECT * FROM Software_Engineering ORDER BY exam_scores DESC")
-
 
 connection.commit()
