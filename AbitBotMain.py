@@ -115,6 +115,17 @@ def menu(message):
 
 @bot.callback_query_handler(func=lambda callback: True)
 def callback_message(callback):
+    if callback.data == 'menu':
+        main_message = callback.message
+        markup = types.InlineKeyboardMarkup()
+        markup.add(types.InlineKeyboardButton("📍 Место в списке абитуриентов", callback_data='place'))
+        markup.add(types.InlineKeyboardButton("📝 Подать аттестат", callback_data='docs'))
+        markup.add(types.InlineKeyboardButton("⚙ АИС Абитуриент", url='https://abiturient.sfu-kras.ru'))
+        markup.add(types.InlineKeyboardButton("🐿 Группа в ВК", url='https://vk.com/dovuz_sfu?from=search'))
+        bot.send_message(main_message.chat.id,
+                         "Вы находитесь в главном меню!\n\n Чтобы узнать свое место в списках поступающих, нажмите <b>Место в списке абитуриентов</b>\n\n Если вы подали аттестат в СФУ, то нажмите <b>Подать аттестат</b>\n\n Чтобы перейти в АИС Абитуриент, нажмите <b>АИС Абитуриент</b>\n\n Чтобы перейти в группу в ВК, нажмите <b>Группа в ВК</b>\n\n",
+                         reply_markup=markup, parse_mode='html')
+
     if callback.data == 'reg':
         main_message = callback.message
         bot.send_message(main_message.chat.id, "Введите ФИО")
@@ -133,22 +144,58 @@ def callback_message(callback):
     elif callback.data == 'place':
         global full_name
         global snils
+        markup = types.InlineKeyboardMarkup()
+        institutes = ['ИКИТ']
+        for mark in institutes:
+            markup.add(types.InlineKeyboardButton(f"{mark}"))
+        bot.send_message(main_message.chat.id, "Выберите институт", reply_markup=markup)
+        bot.register_next_step_handler(main_message, place1)
+
+def place1(main_message):
+    if main_message.text.lower() == 'икит':
+        directions = ['Прикладная информатика', 'Программная инженерия']
+        markup = types.InlineKeyboardMarkup()
+        for mark in directions:
+            markup.add(types.InlineKeyboardButton(f'{mark}'))
+        bot.send_message(main_message.chat.id, "Выберите направление", reply_markup=markup)
+        bot.register_next_step_handler(main_message, place2)
+def place2(main_message):
+    if main_message.text.lower() == 'Приклданая инфоматика':
         place = 0
+        check = False
         if docs == False:
             connection = sqlite3.connect('applicants_of_AppInformatics.db')
             cursor = connection.cursor()
             cursor.execute("""SELECT full_name, snils, exam_scores
-                             FROM Applied_Informatics
-                             ORDER BY exam_scores
-                             DESC""")
+                                     FROM Applied_Informatics
+                                     ORDER BY exam_scores
+                                     DESC""")
             connection.commit()
             for rec in cursor:
                 place += 1
                 if str(rec[0]) == str(full_name):
                     if str(rec[1]) == str(snils):
-                        bot.send_message(callback.message.chat.id, f'Твоё место в списке: {place}')
+                        check = True
+                        bot.send_message(main_message.chat.id, f'Твоё место в списке: {place}')
+            if check == False:
+                markup = types.InlineKeyboardMarkup()
+                markup.add(types.InlineKeyboardButton('Открыть главное меню', callback_data='menu'))
+                bot.send_message(main_message.chat.id, '<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, обратитесть за решением проблемы в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>', reply_markup=markup parse_mode='html')
 
-
+        else:
+            connection = sqlite3.connect('applicants_of_AppInformatics.db')
+            cursor = connection.cursor()
+            cursor.execute("""SELECT full_name, snils, exam_scores
+                              FROM Applied_Informatics
+                              WHERE certificate = true
+                              ORDER BY exam_scores
+                              DESC""")
+            connection.commit()
+            for rec in cursor:
+                place += 1
+                if str(rec[0]) == str(full_name):
+                    if str(rec[1]) == str(snils):
+                        bot.send_message(main_message.chat.id, f'Твоё место в списке: {place}')
 
 def reg2(main_message):
         global full_name
@@ -183,7 +230,7 @@ def reg4(main_message):
     markup.add(types.InlineKeyboardButton("📝 Подать аттестат", callback_data='docs'))
     markup.add(types.InlineKeyboardButton("⚙ АИС Абитуриент", url='https://abiturient.sfu-kras.ru'))
     markup.add(types.InlineKeyboardButton("🐿 Группа в ВК", url='https://vk.com/dovuz_sfu?from=search'))
-    bot.send_message(message.chat.id,
+    bot.send_message(main_message.chat.id,
                      "Вы находитесь в главном меню!\n\n Чтобы узнать свое место в списках поступающих, нажмите <b>Место в списке абитуриентов</b>\n\n Если вы подали аттестат в СФУ, то нажмите <b>Подать аттестат</b>\n\n Чтобы перейти в АИС Абитуриент, нажмите <b>АИС Абитуриент</b>\n\n Чтобы перейти в группу в ВК, нажмите <b>Группа в ВК</b>\n\n",
                      reply_markup=markup, parse_mode='html')
 
