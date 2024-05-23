@@ -190,9 +190,9 @@ def place1(message):
         bot.send_message(message.chat.id, "Выберите направление", reply_markup=markup)
         bot.register_next_step_handler(message, place2)
 def place2(message):
-    if message.text.lower() == 'прикладная инфоматика':
+    if message.text.lower() == 'прикладная информатика':
         place = 0
-        check = False
+        check = None
         if docs == False:
             connection = sqlite3.connect('applicants_of_AppInformatics.db')
             cursor = connection.cursor()
@@ -207,6 +207,10 @@ def place2(message):
                     if str(rec[1]) == str(snils):
                         check = True
                         bot.send_message(message.chat.id, f'Твоё место в списке: {place}')
+                    else:
+                        check = False
+                else:
+                    check = False
             if check == False:
                 markup = types.InlineKeyboardMarkup()
                 markup.add(types.InlineKeyboardButton('Открыть главное меню', callback_data='menu'))
