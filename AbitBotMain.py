@@ -1,4 +1,5 @@
-import telebot
+from aiogram import Bot, Dispatcher, types
+from aiogram import executor
 import sqlite3
 from telebot import types
 from time import sleep
@@ -14,7 +15,8 @@ full_name = None
 snils = None
 
 
-bot = telebot.TeleBot('7006292589:AAFikVQR1SSuXX5RsHxmWrYba3tgpHc265M')
+bot = Bot('7006292589:AAFikVQR1SSuXX5RsHxmWrYba3tgpHc265M')
+dp = Dispatcher(bot)
 
 
 
@@ -22,47 +24,47 @@ bot = telebot.TeleBot('7006292589:AAFikVQR1SSuXX5RsHxmWrYba3tgpHc265M')
 
 
 
-@bot.message_handler(commands = ['start'])
-def start(message):
+@dp.message_handler(commands = ['start'])
+async def start(message):
     if registration == True:
-        bot.send_message(message.chat.id,
+        await bot.send_message(message.chat.id,
                          "Привет! Я бот Abit-SFU, я помогу тебе отслеживать твою позицию в списках абитуриентов СФУ.")
         markup = types.InlineKeyboardMarkup()
         markup.add(types.InlineKeyboardButton("📍 Место в списке абитуриентов", callback_data='place'))
         markup.add(types.InlineKeyboardButton("📝 Подать/Забрать аттестат", callback_data='docs'))
         markup.add(types.InlineKeyboardButton("⚙ АИС Абитуриент", url='https://abiturient.sfu-kras.ru'))
         markup.add(types.InlineKeyboardButton(f"🐿 Группа в ВК {"Поступай в СФУ"}", url='https://vk.com/dovuz_sfu?from=search'))
-        bot.send_message(message.chat.id, "Вы находитесь в главном меню!\n\n Чтобы узнать свое место в списках поступающих, нажмите <b>Место в списке абитуриентов</b>\n\n Если вы подали аттестат в СФУ, то нажмите <b>Подать аттестат</b>\n\n Чтобы перейти в АИС Абитуриент, нажмите <b>АИС Абитуриент</b>\n\n Чтобы перейти в группу в ВК, нажмите <b>Группа в ВК</b>\n\n", reply_markup=markup, parse_mode='html')
+        await bot.send_message(message.chat.id, "Вы находитесь в главном меню!\n\n Чтобы узнать свое место в списках поступающих, нажмите <b>Место в списке абитуриентов</b>\n\n Если вы подали аттестат в СФУ, то нажмите <b>Подать аттестат</b>\n\n Чтобы перейти в АИС Абитуриент, нажмите <b>АИС Абитуриент</b>\n\n Чтобы перейти в группу в ВК, нажмите <b>Группа в ВК</b>\n\n", reply_markup=markup, parse_mode='html')
     if registration == False:
         markup = types.InlineKeyboardMarkup()
         markup.add(types.InlineKeyboardButton('🚀 Зарегистрироваться', callback_data='reg'))
-        bot.send_message(message.chat.id,
+        await bot.send_message(message.chat.id,
                          "Привет! Я бот Abit-SFU, я помогу тебе отслеживать твою позицию в списках абитуриентов СФУ. Для начала давай зарегистрируемся.", reply_markup=markup)
 
 
 
-@bot.message_handler()
-def menu(message):
+@dp.message_handler()
+async def menu(message):
     if message.text.lower() == 'открыть главное меню':
         markup = types.InlineKeyboardMarkup()
         markup.add(types.InlineKeyboardButton("📍 Место в списке абитуриентов", callback_data='place'))
         markup.add(types.InlineKeyboardButton("📝 Подать/Забрать аттестат", callback_data='docs'))
         markup.add(types.InlineKeyboardButton("⚙ АИС Абитуриент", url='https://abiturient.sfu-kras.ru'))
         markup.add(types.InlineKeyboardButton(f"🐿 Группа в ВК {"Поступай в СФУ"}", url='https://vk.com/dovuz_sfu?from=search'))
-        bot.send_message(message.chat.id,
+        await bot.send_message(message.chat.id,
                          "Вы находитесь в главном меню!\n\n Чтобы узнать свое место в списках поступающих, нажмите <b>Место в списке абитуриентов</b>\n\n Если вы подали аттестат в СФУ, то нажмите <b>Подать аттестат</b>\n\n Чтобы перейти в АИС Абитуриент, нажмите <b>АИС Абитуриент</b>\n\n Чтобы перейти в группу в ВК, нажмите <b>Группа в ВК</b>\n\n",
                          reply_markup=markup, parse_mode='html')
 
 
-@bot.callback_query_handler(func=lambda callback: True)
+@dp.callback_query_handler(func=lambda callback: True)
 
 
-def callback_message(callback):
+async def callback_message(callback):
 
     if callback.data == 'reg':
         main_message = callback.message
-        bot.send_message(main_message.chat.id, "Введите ФИО")
-        bot.register_next_step_handler(main_message, reg2)
+        await bot.send_message(main_message.chat.id, "Введите ФИО")
+        await bot.register_next_step_handler(main_message, reg2)
 
     if callback.data == 'menu':
         main_message = callback.message
@@ -72,7 +74,7 @@ def callback_message(callback):
         markup.add(types.InlineKeyboardButton("⚙ АИС Абитуриент", url='https://abiturient.sfu-kras.ru'))
         markup.add(
             types.InlineKeyboardButton(f"🐿 Группа в ВК {"Поступай в СФУ"}", url='https://vk.com/dovuz_sfu?from=search'))
-        bot.send_message(main_message.chat.id,
+        await bot.send_message(main_message.chat.id,
                          "Вы находитесь в главном меню!\n\n Чтобы узнать свое место в списках поступающих, нажмите <b>Место в списке абитуриентов</b>\n\n Если вы подали аттестат в СФУ, то нажмите <b>Подать аттестат</b>\n\n Чтобы перейти в АИС Абитуриент, нажмите <b>АИС Абитуриент</b>\n\n Чтобы перейти в группу в ВК, нажмите <b>Группа в ВК</b>\n\n",
                          reply_markup=markup, parse_mode='html')
 
@@ -81,10 +83,10 @@ def callback_message(callback):
     if callback.data == 'docs':
         if docs == True:
             docs = False
-            bot.send_message(callback.message.chat.id, '<b>Позиция аттестата:</b> Аттестат не подан!', parse_mode='html')
+            await bot.send_message(callback.message.chat.id, '<b>Позиция аттестата:</b> Аттестат не подан!', parse_mode='html')
         else:
             docs = True
-            bot.send_message(callback.message.chat.id, '<b>Позиция аттестата:</b> Аттестат подан!', parse_mode='html')
+            await bot.send_message(callback.message.chat.id, '<b>Позиция аттестата:</b> Аттестат подан!', parse_mode='html')
 
 
     if callback.data == 'place':
@@ -94,19 +96,19 @@ def callback_message(callback):
         institutes = ['ИКИТ']
         for mark in institutes:
             markup.add(types.KeyboardButton(f"{mark}"))
-        bot.send_message(main_message.chat.id, "Выберите институт", reply_markup=markup)
-        bot.register_next_step_handler(main_message, place1)
+        await bot.send_message(main_message.chat.id, "Выберите институт", reply_markup=markup)
+        await bot.register_next_step_handler(main_message, place1)
 
 
 
 
-def reg2(message):
+async def reg2(message):
     global full_name
     full_name = message.text.strip()
-    bot.send_message(message.chat.id, "Введите СНИЛС")
-    bot.register_next_step_handler(message, reg3)
+    await bot.send_message(message.chat.id, "Введите СНИЛС")
+    await bot.register_next_step_handler(message, reg3)
 
-def reg3(message):  # кнопка главное меню
+async def reg3(message):  # кнопка главное меню
     global snils
     global registration
     snils = message.text.strip()
@@ -121,17 +123,17 @@ def reg3(message):  # кнопка главное меню
 
     markup = types.InlineKeyboardMarkup()
     markup.add(types.InlineKeyboardButton("Открыть главное меню", callback_data= 'menu'))
-    bot.send_message(message.chat.id, "Отлично,вы зарегестрированы, откройте главное меню",
+    await bot.send_message(message.chat.id, "Отлично,вы зарегестрированы, откройте главное меню",
                      reply_markup=markup)
-def place1(message):
+async def place1(message):
     if message.text.lower() == 'икит':
         directions = ['Прикладная информатика', 'Программная инженерия']
         markup = types.ReplyKeyboardMarkup()
         for mark in directions:
             markup.add(types.KeyboardButton(f'{mark}'))
-        bot.send_message(message.chat.id, "Выберите направление", reply_markup=markup)
-        bot.register_next_step_handler(message, place2)
-def place2(message):
+        await bot.send_message(message.chat.id, "Выберите направление", reply_markup=markup)
+        await bot.register_next_step_handler(message, place2)
+async def place2(message):
     if message.text.lower() == 'прикладная информатика':
         place = 0
         check = False
@@ -149,12 +151,12 @@ def place2(message):
                     check = True
                     markup = types.InlineKeyboardMarkup()
                     markup.add(types.InlineKeyboardButton('Открыть главное меню', callback_data='menu'))
-                    bot.send_message(message.chat.id, f'Твоё место в списке: {place}', reply_markup=markup)
+                    await bot.send_message(message.chat.id, f'Твоё место в списке: {place}', reply_markup=markup)
                     break
             if check == False:
                 markup = types.InlineKeyboardMarkup()
                 markup.add(types.InlineKeyboardButton('Открыть главное меню', callback_data='menu'))
-                bot.send_message(message.chat.id, '<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, обратитесть за решением проблемы в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>', reply_markup=markup, parse_mode='html')
+                await bot.send_message(message.chat.id, '<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, обратитесть за решением проблемы в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>', reply_markup=markup, parse_mode='html')
 
 
         else:
@@ -172,12 +174,12 @@ def place2(message):
                     check = True
                     markup = types.InlineKeyboardMarkup()
                     markup.add(types.InlineKeyboardButton('Открыть главное меню', callback_data='menu'))
-                    bot.send_message(message.chat.id, f'Твоё место в списке: {place}', reply_markup=markup)
+                    await bot.send_message(message.chat.id, f'Твоё место в списке: {place}', reply_markup=markup)
                     break
             if check == False:
                 markup = types.InlineKeyboardMarkup()
                 markup.add(types.InlineKeyboardButton('Открыть главное меню', callback_data='menu'))
-                bot.send_message(message.chat.id,
+                await bot.send_message(message.chat.id,
                                  '<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, обратитесть за решением проблемы в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>',
                                  reply_markup=markup, parse_mode = 'html')
 
@@ -199,12 +201,12 @@ def place2(message):
                     check = True
                     markup = types.InlineKeyboardMarkup()
                     markup.add(types.InlineKeyboardButton('Открыть главное меню', callback_data='menu'))
-                    bot.send_message(message.chat.id, f'Твоё место в списке: {place}', reply_markup=markup)
+                    await bot.send_message(message.chat.id, f'Твоё место в списке: {place}', reply_markup=markup)
                     break
             if check == False:
                 markup = types.InlineKeyboardMarkup()
                 markup.add(types.InlineKeyboardButton('Открыть главное меню', callback_data='menu'))
-                bot.send_message(message.chat.id,
+                await bot.send_message(message.chat.id,
                                         '<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, обратитесть за решением проблемы в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>',
                                          reply_markup=markup, parse_mode='html')
 
@@ -224,12 +226,12 @@ def place2(message):
                     check = True
                     markup = types.InlineKeyboardMarkup()
                     markup.add(types.InlineKeyboardButton('Открыть главное меню', callback_data='menu'))
-                    bot.send_message(message.chat.id, f'Твоё место в списке: {place}', reply_markup=markup)
+                    await bot.send_message(message.chat.id, f'Твоё место в списке: {place}', reply_markup=markup)
                     break
             if check == False:
                 markup = types.InlineKeyboardMarkup()
                 markup.add(types.InlineKeyboardButton('Открыть главное меню', callback_data='menu'))
-                bot.send_message(message.chat.id,
+                await bot.send_message(message.chat.id,
                                          '<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, обратитесть за решением проблемы в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>',
                                          reply_markup=markup, parse_mode='html')
 
