@@ -1,7 +1,9 @@
 from aiogram import Bot, Dispatcher, types
-from aiogram import executor
+import asyncio
+import telebot
 import sqlite3
 from telebot import types
+from aiogram.filters import CommandStart, Command
 from time import sleep
 
 
@@ -14,20 +16,20 @@ docs = False
 full_name = None
 snils = None
 
-
-bot = Bot('7006292589:AAFikVQR1SSuXX5RsHxmWrYba3tgpHc265M')
-dp = Dispatcher(bot)
-
-
+# _bot = telebot.TeleBot('7006292589:AAFikVQR1SSuXX5RsHxmWrYba3tgpHc265M')
+bot = Bot(token='7006292589:AAFikVQR1SSuXX5RsHxmWrYba3tgpHc265M')
+dp = Dispatcher()
 
 
 
 
 
-@dp.message_handler(commands = ['start'])
-async def start(message):
+
+
+@dp.message(CommandStart())
+async def start(message: Message):
     if registration == True:
-        await bot.send_message(message.chat.id,
+        await message.answer(message.chat.id,
                          "Привет! Я бот Abit-SFU, я помогу тебе отслеживать твою позицию в списках абитуриентов СФУ.")
         markup = types.InlineKeyboardMarkup()
         markup.add(types.InlineKeyboardButton("📍 Место в списке абитуриентов", callback_data='place'))
@@ -43,7 +45,7 @@ async def start(message):
 
 
 
-@dp.message_handler()
+@dp.message()
 async def menu(message):
     if message.text.lower() == 'открыть главное меню':
         markup = types.InlineKeyboardMarkup()
@@ -236,15 +238,26 @@ async def place2(message):
                                          reply_markup=markup, parse_mode='html')
 
 
+async def main():
+    await dp.start_polling(bot)
 
-
-
-
-while True:
+if __name__ == ' __ main __ ':
     try:
-        bot.polling(none_stop=True)
-    except Exception as _ex:
-        print(_ex)
-        sleep(15)
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print('Бот выключен')
 
-"""bot.polling(none_stop = True)"""
+
+
+
+
+
+
+# while True:
+#     try:
+#         _bot.polling(none_stop=True)
+#     except Exception as _ex:
+#         print(_ex)
+#         sleep(15)
+
+# """bot.polling(none_stop = True)"""
