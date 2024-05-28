@@ -1,21 +1,9 @@
 from aiogram import Bot, Dispatcher, types
 import asyncio
 from app.handlers import router
-import telebot
-import sqlite3
-from telebot import types
-from aiogram.filters import CommandStart, Command
-from time import sleep
 
 
 
-
-
-
-registration = False
-docs = False
-full_name = None
-snils = None
 
 
 async def main():
