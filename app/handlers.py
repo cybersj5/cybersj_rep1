@@ -110,7 +110,7 @@ async def get_place(message: Message, state: FSMContext):
                 break
         if list_contains == False:
             message.answer('<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, обратитесть за решением проблемы в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>', reply_markup=kb.open_menu, parse_mode='html')
-        
+        state.set_state(User_states.reg)
 
 
 
