@@ -92,6 +92,8 @@ async def get_place(message: Message, state: FSMContext):
     user_data = await state.get_data()
     list_contains = user_data['list_contains']
     place = user_data['place']
+    full_name = user_data['full_name']
+    snils = user_data['snils']
     if user_data['docs'] == False:
         connection = sqlite3.connect('applicants_of_AppInformatics.db')
         cursor = connection.cursor()
@@ -103,11 +105,12 @@ async def get_place(message: Message, state: FSMContext):
         for rec in cursor:
             place += 1
             if str(rec[0]) == str(full_name) and str(rec[1]) == str(snils):
-                check = True
+                list_contains = True
                 await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
                 break
-        if check == False:
+        if list_contains == False:
             message.answer('<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, обратитесть за решением проблемы в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>', reply_markup=kb.open_menu, parse_mode='html')
+        
 
 
 
