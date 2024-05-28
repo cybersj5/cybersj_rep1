@@ -1,6 +1,7 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
+
 menu = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text='📍 Место в списке абитуриентов', callback_data='place')]
         [InlineKeyboardButton(text='📝 Подать/Забрать аттестат', callback_data='docs')]
