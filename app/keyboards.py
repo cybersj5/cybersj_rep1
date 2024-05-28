@@ -17,3 +17,8 @@ directions = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Приклад�
 
 open_menu = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Открыть главное меню')]])
 
+reply_menu = ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton(text='📍 Место в списке абитуриентов', callback_data='place')]
+        [KeyboardButton(text='📝 Подать/Забрать аттестат', callback_data='docs')]
+        [KeyboardButton(text='⚙ АИС Абитуриент', url='https://abiturient.sfu-kras.ru')]
+        [KeyboardButton(text=f"🐿 Группа в ВК {"Поступай в СФУ"}", url= 'https://vk.com/dovuz_sfu?from=search')]])
