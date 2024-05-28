@@ -1,34 +1,59 @@
 import app.keyboards as kb
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 from aiogram.filters import CommandStart, command
 import sqlite3
 from aiogram import F, Router
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.fsm.context import FSMContext
 
 router = Router()
+
+class Register(StatesGroup):
+    name = State()
+    snils = State()
 
 
 
 
 @router.message(CommandStart())
 async def start(message: Message):
-    if registration == True:
-        await message.answer(
-                         "Привет! Я бот Abit-SFU, я помогу тебе отслеживать твою позицию в списках абитуриентов СФУ.")
-        await message.answer( "Вы находитесь в главном меню!\n\n Чтобы узнать свое место в списках поступающих, нажмите <b>Место в списке абитуриентов</b>\n\n Если вы подали аттестат в СФУ, то нажмите <b>Подать аттестат</b>\n\n Чтобы перейти в АИС Абитуриент, нажмите <b>АИС Абитуриент</b>\n\n Чтобы перейти в группу в ВК, нажмите <b>Группа в ВК</b>\n\n", reply_markup=kb.menu, parse_mode='html')
-    if registration == False:
+    # if registration == True:
+    #     await message.answer(
+    #                      "Привет! Я бот Abit-SFU, я помогу тебе отслеживать твою позицию в списках абитуриентов СФУ.")
+    #     await message.answer( "Вы находитесь в главном меню!\n\n Чтобы узнать свое место в списках поступающих, нажмите <b>Место в списке абитуриентов</b>\n\n Если вы подали аттестат в СФУ, то нажмите <b>Подать аттестат</b>\n\n Чтобы перейти в АИС Абитуриент, нажмите <b>АИС Абитуриент</b>\n\n Чтобы перейти в группу в ВК, нажмите <b>Группа в ВК</b>\n\n", reply_markup=kb.menu, parse_mode='html')
+    # if registration == False:
         await message.answer(
                          "Привет! Я бот Abit-SFU, я помогу тебе отслеживать твою позицию в списках абитуриентов СФУ. Для начала давай зарегистрируемся.", reply_markup=kb.start_reg)
 
 
 
-@router.message(F.text == 'открыть главное меню')
+@router.message(F.text.lower == 'открыть главное меню')
 async def menu(message):
-
         await message.answer("Вы находитесь в главном меню!\n\n Чтобы узнать свое место в списках поступающих, нажмите <b>Место в списке абитуриентов</b>\n\n Если вы подали аттестат в СФУ, то нажмите <b>Подать аттестат</b>\n\n Чтобы перейти в АИС Абитуриент, нажмите <b>АИС Абитуриент</b>\n\n Чтобы перейти в группу в ВК, нажмите <b>Группа в ВК</b>\n\n",
                          reply_markup=kb.menu, parse_mode='html')
 
 
-@router.callback_query(func=lambda callback: True)
+@router.callback_query(F.data == 'reg')
+async def reg(callback: CallbackQuery, state: FSMContext):
+    await state.set_state(Register.name)
+    await callback.message.answer('Введите ваше ФИО')
+@router.message(Register.name)
+async def register_name(message: Message, state: FSMContext):
+    await state.update_data(name=message.text)
+    await state.set_state(Register.snils)
+    await message.answer('Введите свой номер СНИЛС')
+@router.message(Register.snils)
+async def register_snils(message: Message, state: FSMContext):
+    await state.update_data(snils=message.text)
+    await message.answer('Отлично, вы зарегистрированы!\nПерейдите в главное меню', reply_markup=kb.open_menu)
+    user_data = await state.get_data()
+    print(user_data)
+
+
+
+
+
+
 
 
 # async def callback_message(callback):
