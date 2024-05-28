@@ -2,6 +2,8 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
+
+
 menu = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text='📍 Место в списке абитуриентов', callback_data='place')],
         [InlineKeyboardButton(text='📝 Подать/Забрать аттестат', callback_data='docs')],
@@ -11,15 +13,10 @@ start_reg = InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text='🚀 Зарегистрироваться', callback_data='reg')]])
 
 
-institutes = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='ИКИТ')]], resize_keyboard=True, input_field_placeholder='Выберите институт...')
+institutes = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='ИКИТ')]], resize_keyboard=True, input_field_placeholder='Выберите институт...', one_time_keyboard=True)
 
 directions = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Прикладная информатика')],
-                                           [KeyboardButton(text='Программная инженерия')]], resize_keyboard=True, input_field_placeholder='Выберите Специальность...')
+                                           [KeyboardButton(text='Программная инженерия')]], resize_keyboard=True, input_field_placeholder='Выберите Специальность...', one_time_keyboard=True)
 
-open_menu = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Открыть главное меню')]])
+open_menu = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Открыть главное меню')]], resize_keyboard=True)
 
-reply_menu = ReplyKeyboardMarkup(keyboard=[
-        [KeyboardButton(text='📍 Место в списке абитуриентов', callback_data='place')],
-        [KeyboardButton(text='📝 Подать/Забрать аттестат', callback_data='docs')],
-        [KeyboardButton(text='⚙ АИС Абитуриент', url='https://abiturient.sfu-kras.ru')],
-        [KeyboardButton(text=f"🐿 Группа в ВК {"Поступай в СФУ"}", url= 'https://vk.com/dovuz_sfu?from=search')]], resize_keyboard=True, input_field_placeholder='Выберите пункт меню...')

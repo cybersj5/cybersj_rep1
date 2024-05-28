@@ -8,54 +8,117 @@ from aiogram.fsm.context import FSMContext
 
 router = Router()
 
+
 class User_states(StatesGroup):
     no_reg = State()
     reg = State()
-
-
-
-class Register(StatesGroup):
-    name = State()
+    full_name = State()
     snils = State()
+    docs = State()
+    choice_institute = State()
+    choice_direction = State()
+    place = 0
+    list_contains = False
 
 
 
 
 
-@router.message(CommandStart())
+
+
+
+
+
+
+
+@router.message(CommandStart()) # Начало, команда СТАРТ
 async def start(message: Message, state: FSMContext):
     await state.set_state(User_states.no_reg)
-    # if registration == True:
-    #     await message.answer(
-    #                      "Привет! Я бот Abit-SFU, я помогу тебе отслеживать твою позицию в списках абитуриентов СФУ.")
-    #     await message.answer( "Вы находитесь в главном меню!\n\n Чтобы узнать свое место в списках поступающих, нажмите <b>Место в списке абитуриентов</b>\n\n Если вы подали аттестат в СФУ, то нажмите <b>Подать аттестат</b>\n\n Чтобы перейти в АИС Абитуриент, нажмите <b>АИС Абитуриент</b>\n\n Чтобы перейти в группу в ВК, нажмите <b>Группа в ВК</b>\n\n", reply_markup=kb.menu, parse_mode='html')
-    # if registration == False:
     await message.answer(
                         "Привет! Я бот Abit-SFU, я помогу тебе отслеживать твою позицию в списках абитуриентов СФУ. Для начала давай зарегистрируемся.", reply_markup=kb.start_reg)
 
+"""ОБРАБОТЧИКИ ТЕКСТА"""
 
-
-@router.message(F.text.lower == 'открыть главное меню', User_states.reg)
-async def menu(message: Message, states: FSMContext):
+@router.message(F.text == 'Открыть главное меню', User_states.reg) # Открытие главного меню по кнопке
+async def menu(message: Message):
     await message.answer("Вы находитесь в главном меню!\n\n Чтобы узнать свое место в списках поступающих, нажмите <b>Место в списке абитуриентов</b>\n\n Если вы подали аттестат в СФУ, то нажмите <b>Подать аттестат</b>\n\n Чтобы перейти в АИС Абитуриент, нажмите <b>АИС Абитуриент</b>\n\n Чтобы перейти в группу в ВК, нажмите <b>Группа в ВК</b>\n\n",
                          reply_markup=kb.menu, parse_mode='html')
 
-
+# Начальная регистрация пользователя
 @router.callback_query(F.data == 'reg', User_states.no_reg)
 async def reg(callback: CallbackQuery, state: FSMContext):
-    await state.set_state(Register.name)
+    await state.set_state(User_states.full_name)
     await callback.message.answer('Введите ваше ФИО')
-@router.message(Register.name)
+@router.message(User_states.full_name)
 async def register_name(message: Message, state: FSMContext):
-    await state.update_data(name=message.text)
-    await state.set_state(Register.snils)
+    await state.update_data(full_name=message.text)
+    await state.set_state(User_states.snils)
     await message.answer('Введите свой номер СНИЛС')
-@router.message(Register.snils)
+@router.message(User_states.snils)
 async def register_snils(message: Message, state: FSMContext):
     await state.update_data(snils=message.text)
-    user_data = await state.get_data()
+    await state.update_data(no_reg=False)
+    await state.update_data(docs=False)
     await state.set_state(User_states.reg)
     await message.answer('Отлично, вы зарегистрированы!\nПерейдите в главное меню', reply_markup=kb.open_menu)
+
+# Кнопка подачи аттестата
+@router.callback_query(F.data == 'docs', User_states.reg)
+async def docs(callback: CallbackQuery, state: FSMContext):
+    user_data = await state.get_data()
+    if user_data['docs'] == False:
+        await state.update_data(docs=True)
+        await callback.answer('Режим подачи аттестата: ✅')
+        await callback.message.answer('Режим подачи аттестата: ✅')
+    if user_data['docs'] == True:
+        await state.update_data(docs=False)
+        await callback.answer('Режим подачи аттестата: 🚫')
+        await callback.message.answer('Режим подачи аттестата: 🚫')
+
+# Кнопка показа места в списке
+@router.callback_query(F.data == 'place', User_states.reg)
+async def get_place_choice_institute(callback: CallbackQuery, state: FSMContext):
+    await state.set_state(User_states.choice_institute)
+    await callback.message.answer("Выберите институт", reply_markup=kb.institutes)
+    await callback.answer('Выберите институт')
+    """Институты и их направления"""
+# ИКИТ
+@router.message(F.text == 'ИКИТ', User_states.choice_institute)
+async def get_place_choice_direction(message: Message, state: FSMContext):
+    await state.set_state(User_states.choice_direction)
+    await message.answer('Выберите направление', reply_markup=kb.directions)
+@router.message(F.text == 'Прикладная информатика', User_states.choice_direction)
+async def get_place(message: Message, state: FSMContext):
+    user_data = await state.get_data()
+    list_contains = user_data['list_contains']
+    place = user_data['place']
+    if user_data['docs'] == False:
+        connection = sqlite3.connect('applicants_of_AppInformatics.db')
+        cursor = connection.cursor()
+        cursor.execute("""SELECT full_name, snils, exam_scores
+                          FROM Applied_Informatics
+                          ORDER BY exam_scores
+                          DESC""")
+        connection.commit()
+        for rec in cursor:
+            place += 1
+            if str(rec[0]) == str(full_name) and str(rec[1]) == str(snils):
+                check = True
+                await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
+                break
+        if check == False:
+            message.answer('<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, обратитесть за решением проблемы в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>', reply_markup=kb.open_menu, parse_mode='html')
+
+
+
+
+
+
+
+
+
+
+
 
 
 
