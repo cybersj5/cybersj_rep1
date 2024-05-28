@@ -17,8 +17,6 @@ class User_states(StatesGroup):
     docs = State()
     choice_institute = State()
     choice_direction = State()
-    place = 0
-    list_contains = False
 
 
 
@@ -90,11 +88,12 @@ async def get_place_choice_direction(message: Message, state: FSMContext):
 @router.message(F.text == 'Прикладная информатика', User_states.choice_direction)
 async def get_place(message: Message, state: FSMContext):
     user_data = await state.get_data()
-    list_contains = user_data['list_contains']
-    place = user_data['place']
-    full_name = user_data['full_name']
-    snils = user_data['snils']
-    if user_data['docs'] == False:
+    await state.set_state(User_states.reg)
+    list_contains = False
+    place = 0
+    full_name = user_data["full_name"]
+    snils = user_data["snils"]
+    if user_data["docs"] == False:
         connection = sqlite3.connect('applicants_of_AppInformatics.db')
         cursor = connection.cursor()
         cursor.execute("""SELECT full_name, snils, exam_scores
@@ -110,7 +109,7 @@ async def get_place(message: Message, state: FSMContext):
                 break
         if list_contains == False:
             message.answer('<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, обратитесть за решением проблемы в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>', reply_markup=kb.open_menu, parse_mode='html')
-        state.set_state(User_states.reg)
+
 
 
 
