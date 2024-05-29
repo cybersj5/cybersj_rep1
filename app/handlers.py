@@ -199,7 +199,7 @@ async def get_place(message: Message, state: FSMContext):
             if str(rec[0]) == str(_names) and str(rec[1]) == str(snils) and str(rec[2]) == str(exam_scores):
                 await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
                 break
-        cursor.execute(f"DELETE FROM Applied_Informatics [WHERE full_name=? AND certificate=?]", (str(_names), True))
+        cursor.execute("DELETE FROM Applied_Informatics [WHERE full_name=? AND certificate=?]", (str(_names), 1))
         connection.commit()
 @router.message(F.text == "Религиоведение", User_states.choice_direction)
 async def get_place(message: Message, state: FSMContext):
@@ -250,7 +250,7 @@ async def get_place(message: Message, state: FSMContext):
             if str(rec[0]) == str(_names) and str(rec[1]) == str(snils) and str(rec[2]) == str(exam_scores):
                 await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
                 break
-        cursor.execute(f"DELETE FROM Religious_studies [WHERE full_name=? AND certificate=?]", (str(_names), True))
+        cursor.execute("DELETE FROM Religious_studies [WHERE full_name=? AND certificate=?]", (str(_names), 1))
         connection.commit()
 
 
@@ -313,7 +313,7 @@ async def get_place(message: Message, state: FSMContext):
             if str(rec[0]) == str(_names) and str(rec[1]) == str(snils) and str(rec[2]) == str(exam_scores):
                 await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
                 break
-        cursor.execute(f"DELETE FROM Software_Engineering [WHERE full_name=? AND certificate=?]", (str(_names), True))
+        cursor.execute("DELETE FROM Software_Engineering [WHERE full_name=? AND certificate=?]", (str(_names), 1))
         connection.commit()
 
 
