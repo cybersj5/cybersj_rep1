@@ -19,6 +19,9 @@ class User_states(StatesGroup):
     choice_institute = State()
     choice_direction = State()
     list_contains = State()
+    change_snils = State()
+    change_full_name = State()
+    change_scores = State()
 
 
 
@@ -30,20 +33,69 @@ class User_states(StatesGroup):
 
 
 
-
-@router.message(CommandStart()) # Начало, команда СТАРТ
+# Начало, команда СТАРТ
+@router.message(CommandStart(), User_states.reg)
 async def start(message: Message, state: FSMContext):
     await state.set_state(User_states.no_reg)
     await message.answer(
-                        "Привет! Я бот Abit-SFU, я помогу тебе отслеживать твою позицию в списках абитуриентов СФУ. Для начала давай зарегистрируемся.", reply_markup=kb.start_reg)
+                        "Привет! С помощью этого бота ты можешь отслеживать свою позицию в конкурсных списках абитуриентов СФУ. Для начала давай зарегистрируемся.", reply_markup=kb.start_reg)
+
+# Команда СТАРТ после регистрации
+# @router.message(CommandStart(), User_states.reg)
+# async def start_menu(message: Message):
+#     await message.answer(
+#         "Вы находитесь в главном меню!\n\n Чтобы узнать свое место в списках поступающих, нажмите <b>Место в списке абитуриентов</b>\n\n Если вы подали аттестат в СФУ, то нажмите <b>Подать аттестат</b>\n\n Чтобы перейти в АИС Абитуриент, нажмите <b>АИС Абитуриент</b>\n\n Чтобы перейти в группу в ВК <i>Поступай в СФУ</i>, нажмите <b>Группа в ВК</b>\n\n",
+#         reply_markup=kb.menu, parse_mode='html')
 
 """ОБРАБОТЧИКИ ТЕКСТА"""
 
-@router.message(F.text == 'Открыть главное меню', User_states.reg) # Открытие главного меню по кнопке
+# Открытие главного меню по кнопке
+@router.message(F.text == '🛠 Вывести главное меню', User_states.reg)
 async def menu(message: Message):
-    await message.answer("Вы находитесь в главном меню!\n\n Чтобы узнать свое место в списках поступающих, нажмите <b>Место в списке абитуриентов</b>\n\n Если вы подали аттестат в СФУ, то нажмите <b>Подать аттестат</b>\n\n Чтобы перейти в АИС Абитуриент, нажмите <b>АИС Абитуриент</b>\n\n Чтобы перейти в группу в ВК, нажмите <b>Группа в ВК</b>\n\n",
+    await message.answer("Вы находитесь в главном меню!\n\n Чтобы узнать свое место в списках поступающих, нажмите <b>Место в списке абитуриентов</b>\n\n Если вы подали аттестат в СФУ, то нажмите <b>Подать аттестат</b>\n\n Чтобы перейти в АИС Абитуриент, нажмите <b>АИС Абитуриент</b>\n\n Чтобы перейти в группу в ВК <i>Поступай в СФУ</i>, нажмите <b>Группа в ВК</b>\n\n",
                          reply_markup=kb.menu, parse_mode='html')
+# Просмотр данных
+@router.message(F.text == '👨‍💻 Посмотреть мои данные')
+async def watch_data(message: Message, state: FSMContext):
+    user_data = await state.get_data()
+    full_name = user_data['full_name']
+    snils = user_data['snils']
+    exam_scores = user_data['exam_scores']
+    await message.answer(f'<b>Ваше ФИО:</b> {full_name}\n<b>Ваш номер СНИЛС:</b> {snils}\n<b>Ваши Баллы ЕГЭ:</b> {exam_scores}', parse_mode='html')
 
+# ИЗМЕНЕНИЕ ДАННЫХ
+@router.message(F.text == 'Изменить\nСНИЛС')
+async def change_snils_start(message: Message, state: FSMContext):
+    await state.set_state(User_states.change_snils)
+    await message.answer('Введите номер СНИЛС')
+@router.message(User_states.change_snils)
+async def change_snils(message: Message, state: FSMContext):
+    await state.set_state(User_states.reg)
+    await state.update_data(snils=message.text)
+    await message.answer('Готово!')
+
+@router.message(F.text == 'Изменить\nФИО')
+async def change_full_name_start(message: Message, state: FSMContext):
+    await state.set_state(User_states.change_full_name)
+    await message.answer('Введите ФИО')
+@router.message(User_states.change_full_name)
+async def change_full_name(message: Message, state: FSMContext):
+    await state.set_state(User_states.reg)
+    await state.update_data(full_name=message.text)
+    await message.answer('Готово!')
+
+@router.message(F.text == 'Изменить\nбаллы ЕГЭ')
+async def change_scores_start(message: Message, state: FSMContext):
+    await state.set_state(User_states.change_scores)
+    await message.answer('Введите количество баллов ЕГЭ')
+@router.message(User_states.change_scores)
+async def change_scores(message: Message, state: FSMContext):
+    await state.set_state(User_states.reg)
+    await state.update_data(exam_scores=message.text)
+    await message.answer('Готово!')
+
+
+"""CALLBACK_DATA"""
 # Начальная регистрация пользователя
 @router.callback_query(F.data == 'reg', User_states.no_reg)
 async def reg(callback: CallbackQuery, state: FSMContext):
@@ -120,11 +172,11 @@ async def get_place(message: Message, state: FSMContext):
         connection.commit()
         for rec in cursor:
             place += 1
-            if str(rec[0]) == str(_names) and str(rec[1]) == str(snils):
+            if str(rec[0]) == str(_names) and str(rec[1]) == str(snils) and str(rec[2]) == str(exam_scores):
                 await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
                 break
     if list_contains == False:
-        await message.answer('<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, обратитесть за решением проблемы в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>', reply_markup=kb.open_menu, parse_mode='html')
+        await message.answer('<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, проверьте правильность ваших данных в боте.\nЕсли всё данные верны, проверьте наличие поданных документов, позвонив в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>', reply_markup=kb.open_menu, parse_mode='html')
     if user_data["docs"] == True and list_contains == True:
         connection = sqlite3.connect('applicants_of_AppInformatics.db')
         cursor = connection.cursor()
@@ -140,7 +192,7 @@ async def get_place(message: Message, state: FSMContext):
         connection.commit()
         for rec in cursor:
             place += 1
-            if str(rec[0]) == str(_names) and str(rec[1]) == str(snils):
+            if str(rec[0]) == str(_names) and str(rec[1]) == str(snils) and str(rec[2]) == str(exam_scores):
                 await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
                 break
         cursor.execute(f"DELETE FROM Applied_Informatics WHERE full_name=? AND certificate=?", (str(_names), 1))
@@ -171,12 +223,12 @@ async def get_place(message: Message, state: FSMContext):
         connection.commit()
         for rec in cursor:
             place += 1
-            if str(rec[0]) == str(_names) and str(rec[1]) == str(snils):
+            if str(rec[0]) == str(_names) and str(rec[1]) == str(snils) and str(rec[2]) == str(exam_scores):
                 await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
                 break
     if list_contains == False:
         await message.answer(
-            '<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, обратитесть за решением проблемы в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>',
+            '<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, проверьте правильность ваших данных в боте.\nЕсли всё данные верны, проверьте наличие поданных документов, позвонив в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>',
             reply_markup=kb.open_menu, parse_mode='html')
     if user_data["docs"] == True and list_contains == True:
         count_recs = int(list(cursor.execute("SELECT count (*) FROM Religious_studies"))[0][0])
@@ -191,10 +243,10 @@ async def get_place(message: Message, state: FSMContext):
         connection.commit()
         for rec in cursor:
             place += 1
-            if str(rec[0]) == str(_names) and str(rec[1]) == str(snils):
+            if str(rec[0]) == str(_names) and str(rec[1]) == str(snils) and str(rec[2]) == str(exam_scores):
                 await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
                 break
-        cursor.execute(f"DELETE FROM Software_Engineering WHERE full_name=? AND certificate=?", (str(_names), 1))
+        cursor.execute(f"DELETE FROM Religious_studies WHERE full_name=? AND certificate=?", (str(_names), 1))
         connection.commit()
 
 
@@ -233,11 +285,11 @@ async def get_place(message: Message, state: FSMContext):
         connection.commit()
         for rec in cursor:
             place += 1
-            if str(rec[0]) == str(_names) and str(rec[1]) == str(snils):
+            if str(rec[0]) == str(_names) and str(rec[1]) == str(snils) and str(rec[2]) == str(exam_scores):
                 await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
                 break
     if list_contains == False:
-        await message.answer('<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, обратитесть за решением проблемы в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>', reply_markup=kb.open_menu, parse_mode='html')
+        await message.answer('<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, проверьте правильность ваших данных в боте.\nЕсли всё данные верны, проверьте наличие поданных документов, позвонив в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>', reply_markup=kb.open_menu, parse_mode='html')
     if user_data["docs"] == True and list_contains == True:
         connection = sqlite3.connect('applicants_of_AppInformatics.db')
         cursor = connection.cursor()
@@ -253,7 +305,7 @@ async def get_place(message: Message, state: FSMContext):
         connection.commit()
         for rec in cursor:
             place += 1
-            if str(rec[0]) == str(_names) and str(rec[1]) == str(snils):
+            if str(rec[0]) == str(_names) and str(rec[1]) == str(snils) and str(rec[2]) == str(exam_scores):
                 await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
                 break
         cursor.execute(f"DELETE FROM Applied_Informatics WHERE full_name=? AND certificate=?", (str(_names), 1))
@@ -284,12 +336,12 @@ async def get_place(message: Message, state: FSMContext):
         connection.commit()
         for rec in cursor:
             place += 1
-            if str(rec[0]) == str(_names) and str(rec[1]) == str(snils):
+            if str(rec[0]) == str(_names) and str(rec[1]) == str(snils) and str(rec[2]) == str(exam_scores):
                 await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
                 break
     if list_contains == False:
         await message.answer(
-            '<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, обратитесть за решением проблемы в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>',
+            '<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, проверьте правильность ваших данных в боте.\nЕсли всё данные верны, проверьте наличие поданных документов, позвонив в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>',
             reply_markup=kb.open_menu, parse_mode='html')
     if user_data["docs"] == True and list_contains == True:
         count_recs = int(list(cursor.execute("SELECT count (*) FROM Software_Engineering"))[0][0])
@@ -304,7 +356,7 @@ async def get_place(message: Message, state: FSMContext):
         connection.commit()
         for rec in cursor:
             place += 1
-            if str(rec[0]) == str(_names) and str(rec[1]) == str(snils):
+            if str(rec[0]) == str(_names) and str(rec[1]) == str(snils) and str(rec[2]) == str(exam_scores):
                 await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
                 break
         cursor.execute(f"DELETE FROM Software_Engineering WHERE full_name=? AND certificate=?", (str(_names), 1))

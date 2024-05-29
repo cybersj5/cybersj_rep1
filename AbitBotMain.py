@@ -1,7 +1,7 @@
 from aiogram import Bot, Dispatcher
 import asyncio
 from app.handlers import router
-
+from aiogram.methods import SetMyShortDescription
 
 
 
