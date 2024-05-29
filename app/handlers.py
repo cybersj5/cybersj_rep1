@@ -18,6 +18,7 @@ class User_states(StatesGroup):
     docs = State()
     choice_institute = State()
     choice_direction = State()
+    list_contains = State()
 
 
 
@@ -63,6 +64,7 @@ async def register_snils(message: Message, state: FSMContext):
     await state.update_data(snils=message.text)
     await state.update_data(no_reg=False)
     await state.update_data(docs=False)
+    await state.update_data(list_contains=False)
     await state.set_state(User_states.reg)
     await message.answer('Отлично, вы зарегистрированы!\nПерейдите в главное меню', reply_markup=kb.open_menu)
 
@@ -95,14 +97,21 @@ async def get_place_choice_direction(message: Message, state: FSMContext):
 async def get_place(message: Message, state: FSMContext):
     user_data = await state.get_data()
     await state.set_state(User_states.reg)
-    list_contains = False
     place = 0
     full_name = user_data["full_name"]
     snils = user_data["snils"]
     exam_scores = user_data["exam_scores"]
-    if user_data["docs"] == False:
-        connection = sqlite3.connect('applicants_of_AppInformatics.db')
-        cursor = connection.cursor()
+    list_contains = user_data["list_contains"]
+    connection = sqlite3.connect('applicants_of_AppInformatics.db')
+    cursor = connection.cursor()
+    cursor.execute("""SELECT *
+                      FROM Applied_Informatics""")
+    connection.commit()
+    for rec in cursor:
+        if str(rec[2]) == str(full_name) and str(rec[3]) == str(snils):
+            list_contains = True
+            break
+    if user_data["docs"] == False and list_contains == True:
         cursor.execute("""SELECT full_name, snils, exam_scores
                           FROM Applied_Informatics
                           ORDER BY exam_scores
@@ -111,12 +120,11 @@ async def get_place(message: Message, state: FSMContext):
         for rec in cursor:
             place += 1
             if str(rec[0]) == str(full_name) and str(rec[1]) == str(snils):
-                list_contains = True
                 await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
                 break
-        if list_contains == False:
-            await message.answer('<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, обратитесть за решением проблемы в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>', reply_markup=kb.open_menu, parse_mode='html')
-    else:
+    if list_contains == False:
+        await message.answer('<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, обратитесть за решением проблемы в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>', reply_markup=kb.open_menu, parse_mode='html')
+    if user_data["docs"] == True and list_contains == True:
         connection = sqlite3.connect('applicants_of_AppInformatics.db')
         cursor = connection.cursor()
         count_recs = int(list(cursor.execute("SELECT count (*) FROM Applied_Informatics"))[0][0])
@@ -133,12 +141,61 @@ async def get_place(message: Message, state: FSMContext):
             place += 1
             if str(rec[0]) == str(full_name) and str(rec[1]) == str(snils):
                 await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
-                list_contains = False
                 break
-        if list_contains == False:
-            await message.answer(
-                '<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, обратитесть за решением проблемы в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>',
-                reply_markup=kb.open_menu, parse_mode='html')
+        cursor.execute("DELETE FROM Applied_Informatics WHERE full_name={full_name} AND certificate=True")
+        connection.commit()
+@router.message(F.text == "Программная инженерия", User_states.choice_direction)
+async def get_place(message: Message, state: FSMContext):
+    user_data = await state.get_data()
+    await state.set_state(User_states.reg)
+    place = 0
+    full_name = user_data["full_name"]
+    snils = user_data["snils"]
+    exam_scores = user_data["exam_scores"]
+    list_contains = user_data["list_contains"]
+    connection = sqlite3.connect('applicants_of_SoftEngineering.db')
+    cursor = connection.cursor()
+    cursor.execute("""SELECT *
+                          FROM Software_Engineering""")
+    connection.commit()
+    for rec in cursor:
+        if str(rec[2]) == str(full_name) and str(rec[3]) == str(snils):
+            list_contains = True
+            break
+    if user_data["docs"] == False and list_contains == True:
+        cursor.execute("""SELECT full_name, snils, exam_scores
+                              FROM Software_Engineering
+                              ORDER BY exam_scores
+                              DESC""")
+        connection.commit()
+        for rec in cursor:
+            place += 1
+            if str(rec[0]) == str(full_name) and str(rec[1]) == str(snils):
+                await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
+                break
+    if list_contains == False:
+        await message.answer(
+            '<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, обратитесть за решением проблемы в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>',
+            reply_markup=kb.open_menu, parse_mode='html')
+    if user_data["docs"] == True and list_contains == True:
+        count_recs = int(list(cursor.execute("SELECT count (*) FROM Software_Engineering"))[0][0])
+        applicant_user = [count_recs + 1, True, full_name, snils, exam_scores]
+        cursor.execute("INSERT OR IGNORE INTO Software_Engineering VALUES(?,?,?,?,?);", applicant_user)
+        connection.commit()
+        cursor.execute("""SELECT full_name, snils, exam_scores
+                                      FROM Software_Engineering
+                                      WHERE certificate = True
+                                      ORDER BY exam_scores
+                                      DESC""")
+        connection.commit()
+        for rec in cursor:
+            place += 1
+            if str(rec[0]) == str(full_name) and str(rec[1]) == str(snils):
+                await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
+                break
+        cursor.execute("DELETE FROM Software_Engineering WHERE full_name={full_name} AND certificate=True")
+        connection.commit()
+
 
 
 

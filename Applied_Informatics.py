@@ -63,11 +63,11 @@ applicant_20 = [17, False, 'Гущин Егор Романович', '5713321811
 curse.execute("INSERT OR IGNORE INTO Applied_Informatics VALUES(?,?,?,?,?);", applicant_20)
 
 connection.commit()
-
-curse.execute("""SELECT full_name, snils, exam_scores
-                             FROM Applied_Informatics
-                             ORDER BY exam_scores
-                             DESC""")
+curse.execute("""Select * from Applied_Informatics""")
+# curse.execute("""SELECT full_name, snils, exam_scores
+#                              FROM Applied_Informatics
+#                              ORDER BY exam_scores
+#                              DESC""")
 
 # curse.execute("DELETE FROM Applied_Informatics")
 # connection.commit()
