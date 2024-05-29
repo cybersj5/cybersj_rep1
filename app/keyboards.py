@@ -13,10 +13,13 @@ start_reg = InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text='🚀 Зарегистрироваться', callback_data='reg')]])
 
 
-institutes = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='ИКИТ')]], resize_keyboard=True, input_field_placeholder='Выберите институт...', one_time_keyboard=True)
+institutes = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='ИКИТ')],
+                                           [KeyboardButton(text='ГИ')]], resize_keyboard=True, input_field_placeholder='Выберите институт...', one_time_keyboard=True)
 
-directions = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Прикладная информатика')],
+directions_IKIT = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Прикладная информатика')],
                                            [KeyboardButton(text='Программная инженерия')]], resize_keyboard=True, input_field_placeholder='Выберите Специальность...', one_time_keyboard=True)
+directions_GI = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Прикладная информатика')],
+                                           [KeyboardButton(text='Религиоведение')]], resize_keyboard=True, input_field_placeholder='Выберите Специальность...', one_time_keyboard=True)
 
 open_menu = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Открыть главное меню')]], resize_keyboard=True)
 

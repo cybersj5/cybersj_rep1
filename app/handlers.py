@@ -88,17 +88,18 @@ async def get_place_choice_institute(callback: CallbackQuery, state: FSMContext)
     await callback.message.answer("Выберите институт", reply_markup=kb.institutes)
     await callback.answer('Выберите институт')
     """Институты и их направления"""
-# ИКИТ
-@router.message(F.text == 'ИКИТ', User_states.choice_institute)
+# ГИ
+@router.message(F.text == 'ГИ', User_states.choice_institute)
 async def get_place_choice_direction(message: Message, state: FSMContext):
     await state.set_state(User_states.choice_direction)
-    await message.answer('Выберите направление', reply_markup=kb.directions)
+    await message.answer('Выберите направление', reply_markup=kb.directions_GI)
+
 @router.message(F.text == 'Прикладная информатика', User_states.choice_direction)
 async def get_place(message: Message, state: FSMContext):
     user_data = await state.get_data()
     await state.set_state(User_states.reg)
     place = 0
-    full_name = user_data["full_name"]
+    _names = user_data["full_name"]
     snils = user_data["snils"]
     exam_scores = user_data["exam_scores"]
     list_contains = user_data["list_contains"]
@@ -108,7 +109,7 @@ async def get_place(message: Message, state: FSMContext):
                       FROM Applied_Informatics""")
     connection.commit()
     for rec in cursor:
-        if str(rec[2]) == str(full_name) and str(rec[3]) == str(snils):
+        if str(rec[2]) == str(_names) and str(rec[3]) == str(snils):
             list_contains = True
             break
     if user_data["docs"] == False and list_contains == True:
@@ -119,7 +120,7 @@ async def get_place(message: Message, state: FSMContext):
         connection.commit()
         for rec in cursor:
             place += 1
-            if str(rec[0]) == str(full_name) and str(rec[1]) == str(snils):
+            if str(rec[0]) == str(_names) and str(rec[1]) == str(snils):
                 await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
                 break
     if list_contains == False:
@@ -128,7 +129,7 @@ async def get_place(message: Message, state: FSMContext):
         connection = sqlite3.connect('applicants_of_AppInformatics.db')
         cursor = connection.cursor()
         count_recs = int(list(cursor.execute("SELECT count (*) FROM Applied_Informatics"))[0][0])
-        applicant_user = [count_recs+1, True, full_name, snils, exam_scores]
+        applicant_user = [count_recs+1, True, _names, snils, exam_scores]
         cursor.execute("INSERT OR IGNORE INTO Applied_Informatics VALUES(?,?,?,?,?);", applicant_user)
         connection.commit()
         cursor.execute("""SELECT full_name, snils, exam_scores
@@ -139,17 +140,130 @@ async def get_place(message: Message, state: FSMContext):
         connection.commit()
         for rec in cursor:
             place += 1
-            if str(rec[0]) == str(full_name) and str(rec[1]) == str(snils):
+            if str(rec[0]) == str(_names) and str(rec[1]) == str(snils):
                 await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
                 break
-        cursor.execute("DELETE FROM Applied_Informatics WHERE full_name={full_name} AND certificate=True")
+        cursor.execute(f"DELETE FROM Applied_Informatics WHERE full_name=? AND certificate=?", (str(_names), 1))
+        connection.commit()
+@router.message(F.text == "Религиоведение", User_states.choice_direction)
+async def get_place(message: Message, state: FSMContext):
+    user_data = await state.get_data()
+    await state.set_state(User_states.reg)
+    place = 0
+    _names = user_data["full_name"]
+    snils = user_data["snils"]
+    exam_scores = user_data["exam_scores"]
+    list_contains = user_data["list_contains"]
+    connection = sqlite3.connect('applicants_of_Religious_studies.db')
+    cursor = connection.cursor()
+    cursor.execute("""SELECT *
+                      FROM Religious_studies""")
+    connection.commit()
+    for rec in cursor:
+        if str(rec[2]) == str(_names) and str(rec[3]) == str(snils):
+            list_contains = True
+            break
+    if user_data["docs"] == False and list_contains == True:
+        cursor.execute("""SELECT full_name, snils, exam_scores
+                              FROM Religious_studies
+                              ORDER BY exam_scores
+                              DESC""")
+        connection.commit()
+        for rec in cursor:
+            place += 1
+            if str(rec[0]) == str(_names) and str(rec[1]) == str(snils):
+                await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
+                break
+    if list_contains == False:
+        await message.answer(
+            '<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, обратитесть за решением проблемы в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>',
+            reply_markup=kb.open_menu, parse_mode='html')
+    if user_data["docs"] == True and list_contains == True:
+        count_recs = int(list(cursor.execute("SELECT count (*) FROM Religious_studies"))[0][0])
+        applicant_user = [count_recs + 1, True, _names, snils, exam_scores]
+        cursor.execute("INSERT OR IGNORE INTO Religious_studies VALUES(?,?,?,?,?);", applicant_user)
+        connection.commit()
+        cursor.execute("""SELECT full_name, snils, exam_scores
+                                      FROM Religious_studies
+                                      WHERE certificate = True
+                                      ORDER BY exam_scores
+                                      DESC""")
+        connection.commit()
+        for rec in cursor:
+            place += 1
+            if str(rec[0]) == str(_names) and str(rec[1]) == str(snils):
+                await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
+                break
+        cursor.execute(f"DELETE FROM Software_Engineering WHERE full_name=? AND certificate=?", (str(_names), 1))
+        connection.commit()
+
+
+
+
+
+
+# ИКИТ
+@router.message(F.text == 'ИКИТ', User_states.choice_institute)
+async def get_place_choice_direction(message: Message, state: FSMContext):
+    await state.set_state(User_states.choice_direction)
+    await message.answer('Выберите направление', reply_markup=kb.directions_IKIT)
+@router.message(F.text == 'Прикладная информатика', User_states.choice_direction)
+async def get_place(message: Message, state: FSMContext):
+    user_data = await state.get_data()
+    await state.set_state(User_states.reg)
+    place = 0
+    _names = user_data["full_name"]
+    snils = user_data["snils"]
+    exam_scores = user_data["exam_scores"]
+    list_contains = user_data["list_contains"]
+    connection = sqlite3.connect('applicants_of_AppInformatics.db')
+    cursor = connection.cursor()
+    cursor.execute("""SELECT *
+                      FROM Applied_Informatics""")
+    connection.commit()
+    for rec in cursor:
+        if str(rec[2]) == str(_names) and str(rec[3]) == str(snils):
+            list_contains = True
+            break
+    if user_data["docs"] == False and list_contains == True:
+        cursor.execute("""SELECT full_name, snils, exam_scores
+                          FROM Applied_Informatics
+                          ORDER BY exam_scores
+                          DESC""")
+        connection.commit()
+        for rec in cursor:
+            place += 1
+            if str(rec[0]) == str(_names) and str(rec[1]) == str(snils):
+                await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
+                break
+    if list_contains == False:
+        await message.answer('<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, обратитесть за решением проблемы в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>', reply_markup=kb.open_menu, parse_mode='html')
+    if user_data["docs"] == True and list_contains == True:
+        connection = sqlite3.connect('applicants_of_AppInformatics.db')
+        cursor = connection.cursor()
+        count_recs = int(list(cursor.execute("SELECT count (*) FROM Applied_Informatics"))[0][0])
+        applicant_user = [count_recs+1, True, _names, snils, exam_scores]
+        cursor.execute("INSERT OR IGNORE INTO Applied_Informatics VALUES(?,?,?,?,?);", applicant_user)
+        connection.commit()
+        cursor.execute("""SELECT full_name, snils, exam_scores
+                                  FROM Applied_Informatics
+                                  WHERE certificate = True
+                                  ORDER BY exam_scores
+                                  DESC""")
+        connection.commit()
+        for rec in cursor:
+            place += 1
+            if str(rec[0]) == str(_names) and str(rec[1]) == str(snils):
+                await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
+                break
+        cursor.execute(f"DELETE FROM Applied_Informatics WHERE full_name=? AND certificate=?", (str(_names), 1))
         connection.commit()
 @router.message(F.text == "Программная инженерия", User_states.choice_direction)
 async def get_place(message: Message, state: FSMContext):
     user_data = await state.get_data()
     await state.set_state(User_states.reg)
     place = 0
-    full_name = user_data["full_name"]
+    _names = user_data["full_name"]
     snils = user_data["snils"]
     exam_scores = user_data["exam_scores"]
     list_contains = user_data["list_contains"]
@@ -159,7 +273,7 @@ async def get_place(message: Message, state: FSMContext):
                           FROM Software_Engineering""")
     connection.commit()
     for rec in cursor:
-        if str(rec[2]) == str(full_name) and str(rec[3]) == str(snils):
+        if str(rec[2]) == str(_names) and str(rec[3]) == str(snils):
             list_contains = True
             break
     if user_data["docs"] == False and list_contains == True:
@@ -170,7 +284,7 @@ async def get_place(message: Message, state: FSMContext):
         connection.commit()
         for rec in cursor:
             place += 1
-            if str(rec[0]) == str(full_name) and str(rec[1]) == str(snils):
+            if str(rec[0]) == str(_names) and str(rec[1]) == str(snils):
                 await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
                 break
     if list_contains == False:
@@ -179,7 +293,7 @@ async def get_place(message: Message, state: FSMContext):
             reply_markup=kb.open_menu, parse_mode='html')
     if user_data["docs"] == True and list_contains == True:
         count_recs = int(list(cursor.execute("SELECT count (*) FROM Software_Engineering"))[0][0])
-        applicant_user = [count_recs + 1, True, full_name, snils, exam_scores]
+        applicant_user = [count_recs + 1, True, _names, snils, exam_scores]
         cursor.execute("INSERT OR IGNORE INTO Software_Engineering VALUES(?,?,?,?,?);", applicant_user)
         connection.commit()
         cursor.execute("""SELECT full_name, snils, exam_scores
@@ -190,10 +304,10 @@ async def get_place(message: Message, state: FSMContext):
         connection.commit()
         for rec in cursor:
             place += 1
-            if str(rec[0]) == str(full_name) and str(rec[1]) == str(snils):
+            if str(rec[0]) == str(_names) and str(rec[1]) == str(snils):
                 await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
                 break
-        cursor.execute("DELETE FROM Software_Engineering WHERE full_name={full_name} AND certificate=True")
+        cursor.execute(f"DELETE FROM Software_Engineering WHERE full_name=? AND certificate=?", (str(_names), 1))
         connection.commit()
 
 
