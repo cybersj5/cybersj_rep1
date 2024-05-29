@@ -13,6 +13,7 @@ class User_states(StatesGroup):
     no_reg = State()
     reg = State()
     full_name = State()
+    exam_scores = State()
     snils = State()
     docs = State()
     choice_institute = State()
@@ -50,6 +51,11 @@ async def reg(callback: CallbackQuery, state: FSMContext):
 @router.message(User_states.full_name)
 async def register_name(message: Message, state: FSMContext):
     await state.update_data(full_name=message.text)
+    await state.set_state(User_states.exam_scores)
+    await message.answer('Введите своё количество баллов ЕГЭ')
+@router.message(User_states.exam_scores)
+async def register_scores(message: Message, state: FSMContext):
+    await state.update_data(exam_scores=int(message.text))
     await state.set_state(User_states.snils)
     await message.answer('Введите свой номер СНИЛС')
 @router.message(User_states.snils)
@@ -93,6 +99,7 @@ async def get_place(message: Message, state: FSMContext):
     place = 0
     full_name = user_data["full_name"]
     snils = user_data["snils"]
+    exam_scores = user_data["exam_scores"]
     if user_data["docs"] == False:
         connection = sqlite3.connect('applicants_of_AppInformatics.db')
         cursor = connection.cursor()
@@ -108,8 +115,30 @@ async def get_place(message: Message, state: FSMContext):
                 await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
                 break
         if list_contains == False:
-            message.answer('<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, обратитесть за решением проблемы в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>', reply_markup=kb.open_menu, parse_mode='html')
-
+            await message.answer('<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, обратитесть за решением проблемы в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>', reply_markup=kb.open_menu, parse_mode='html')
+    else:
+        connection = sqlite3.connect('applicants_of_AppInformatics.db')
+        cursor = connection.cursor()
+        count_recs = int(list(cursor.execute("SELECT count (*) FROM Applied_Informatics"))[0][0])
+        applicant_user = [count_recs+1, True, full_name, snils, exam_scores]
+        cursor.execute("INSERT OR IGNORE INTO Applied_Informatics VALUES(?,?,?,?,?);", applicant_user)
+        connection.commit()
+        cursor.execute("""SELECT full_name, snils, exam_scores
+                                  FROM Applied_Informatics
+                                  WHERE certificate = True
+                                  ORDER BY exam_scores
+                                  DESC""")
+        connection.commit()
+        for rec in cursor:
+            place += 1
+            if str(rec[0]) == str(full_name) and str(rec[1]) == str(snils):
+                await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
+                list_contains = False
+                break
+        if list_contains == False:
+            await message.answer(
+                '<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, обратитесть за решением проблемы в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>',
+                reply_markup=kb.open_menu, parse_mode='html')
 
 
 

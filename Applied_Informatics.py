@@ -75,6 +75,7 @@ curse.execute("""SELECT full_name, snils, exam_scores
 connection.commit()
 for i in curse:
     print(i)
+print(list(curse.execute("SELECT count (*) FROM Applied_Informatics"))[0][0])
 # place = 0
 # c = 0
 # for i in curse:
