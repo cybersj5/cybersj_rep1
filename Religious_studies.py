@@ -62,4 +62,7 @@ curse.execute("INSERT OR IGNORE INTO Religious_studies VALUES(?,?,?,?,?);", appl
 applicant_20 = [17, False, 'Гущин Егор Романович', '57133218110', 289]
 curse.execute("INSERT OR IGNORE INTO Religious_studies VALUES(?,?,?,?,?);", applicant_20)
 
+applicant_21 = [18, False, 'Харитонов Егор Александрович', '12345678912', 300]
+curse.execute("INSERT OR IGNORE INTO Religious_studies VALUES(?,?,?,?,?);", applicant_21)
+
 connection.commit()

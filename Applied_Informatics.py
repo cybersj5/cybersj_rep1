@@ -62,6 +62,9 @@ curse.execute("INSERT OR IGNORE INTO Applied_Informatics VALUES(?,?,?,?,?);", ap
 applicant_20 = [17, False, 'Гущин Егор Романович', '57133218110', 289]
 curse.execute("INSERT OR IGNORE INTO Applied_Informatics VALUES(?,?,?,?,?);", applicant_20)
 
+applicant_21 = [18, False, 'Харитонов Егор Александрович', '12345678912', 300]
+curse.execute("INSERT OR IGNORE INTO Applied_Informatics VALUES(?,?,?,?,?);", applicant_21)
+
 connection.commit()
 curse.execute("""Select * from Applied_Informatics""")
 # curse.execute("""SELECT full_name, snils, exam_scores
