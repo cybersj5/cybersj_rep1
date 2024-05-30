@@ -44,7 +44,7 @@ async def start(message: Message, state: FSMContext):
 @router.message(CommandStart(), User_states.reg)
 async def start_menu(message: Message):
     await message.answer(
-        "Вы находитесь в главном меню!\n\n Чтобы узнать свое место в списках поступающих, нажмите <b>Место в списке абитуриентов</b>\n\n Если вы подали аттестат в СФУ, то нажмите <b>Подать аттестат</b>\n\n Чтобы перейти в АИС Абитуриент, нажмите <b>АИС Абитуриент</b>\n\n Чтобы перейти в группу в ВК <i>Поступай в СФУ</i>, нажмите <b>Группа в ВК</b>\n\n",
+        "Вы находитесь в главном меню!\n\n Чтобы узнать свое место в списках поступающих, нажмите <b>Место в списке абитуриентов</b>\n\n Чтобы переключить режи подачи аттестата, нажмите <b>Подать/забрать аттестат</b>\n\n Чтобы перейти в АИС Абитуриент, нажмите <b>АИС Абитуриент</b>\n\n Чтобы перейти в группу в ВК <i>Поступай в СФУ</i>, нажмите <b>Группа в ВК</b>\n\n",
         reply_markup=kb.menu, parse_mode='html')
 
 """ОБРАБОТЧИКИ ТЕКСТА"""
@@ -180,7 +180,7 @@ async def get_place(message: Message, state: FSMContext):
                 await message.answer(f'Твоё место в списке: {place}', reply_markup=kb.open_menu)
                 break
     if list_contains == False:
-        await message.answer('<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, проверьте правильность ваших данных в боте.\nЕсли всё данные верны, проверьте наличие поданных документов, позвонив в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>', reply_markup=kb.open_menu, parse_mode='html')
+        await message.answer('<b>Вас нет в списках!</b>\nЕсли вы подавали документы в СФУ, проверьте правильность ваших данных в боте.\nЕсли все данные верны, проверьте наличие поданных документов, позвонив в приёмную комиссию по телефону:\n<i><b>8 800 550-22-24</b></i>', reply_markup=kb.open_menu, parse_mode='html')
     if user_data["docs"] == True and list_contains == True:
         connection = sqlite3.connect('applicants_of_AppInformatics.db')
         cursor = connection.cursor()
